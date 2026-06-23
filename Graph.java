@@ -3,6 +3,7 @@ package assign07;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * This class contains the representation of graphs using Edges and Matrices
@@ -50,6 +51,20 @@ public class Graph<Type> {
 	}
 
 	/**
+	 * Returns vertex with data in the graph, Throws an expection if not in graph
+	 * 
+	 * @param data
+	 * @return
+	 */
+	public Vertex getVertex(Type data) {
+		Vertex checkVertex = graphMap.get(data);
+		if (checkVertex == null) {
+			throw new IllegalArgumentException();
+		}
+		return checkVertex;
+	}
+
+	/**
 	 * Searches if a path exists between two vertices on a graph
 	 * 
 	 * @param source      - Starting Vertex
@@ -67,20 +82,22 @@ public class Graph<Type> {
 	 * @param source  the current vertex being searched
 	 * @param target  the destination vertex being searched for
 	 * @param visited that stores vertices that have already been visited
-	 * @return true if there is a path from current vertex to the target or false if
-	 *         not
+	 * @return boolean true if path exists false if not
 	 */
 	private boolean depthFirstSearchHelper(Type source, Type target, HashMap<Type, Boolean> visited) {
-		if (source == target) {
+		if (source.equals(target)) {
 			return true;
 		}
 		visited.put(source, true);
 		Vertex sourceVertex = graphMap.get(source);
+
 		List<Edge> outgoingEdges = sourceVertex.getEdges();
+
 		for (Edge edgeDestination : outgoingEdges) {
 			Vertex destinationVertex = edgeDestination.getDestination();
-			if (!visited.containsKey(target)) {
-				return depthFirstSearchHelper(destinationVertex.getData(), target, visited);
+
+			if (!visited.containsKey(destinationVertex)) {
+				depthFirstSearchHelper(destinationVertex.getData(), target, visited);
 			}
 		}
 		return false;
@@ -95,6 +112,40 @@ public class Graph<Type> {
 	 */
 	public List<Type> breadthFirstSearch(Type source, Type destination) {
 		List<Type> returnList = new LinkedList<Type>();
+		HashMap<Type, Type> cameFrom = new HashMap<>();
+		Queue<Vertex> searchQueue = new LinkedList<Vertex>();
+
+		Vertex targetVertex = graphMap.get(destination);
+
+		// Sets up the first list
+		searchQueue.add(graphMap.get(source));
+		cameFrom.put(source, source);
+
+		while (!searchQueue.isEmpty()) {
+			Vertex current = searchQueue.poll();
+			if (current.getData().equals(targetVertex.getData())) {
+				break;
+			}
+
+			List<Edge> outgoingEdges = current.getEdges();
+
+			for (Edge edgeDestination : outgoingEdges) {
+
+				Vertex destinationVertex = edgeDestination.getDestination();
+				if (!cameFrom.containsKey(destinationVertex.getData())) {
+					cameFrom.put(destinationVertex.getData(), current.getData());
+					searchQueue.add(destinationVertex);
+				}
+			}
+
+		}
+		Type path = destination;
+		while (!path.equals(source)) {
+			returnList.addFirst(path);
+			path = cameFrom.get(path);
+		}
+		returnList.addFirst(source);
+
 		return returnList;
 	}
 

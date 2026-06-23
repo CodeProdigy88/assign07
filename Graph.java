@@ -7,11 +7,11 @@ import java.util.List;
 /**
  * This class contains the representation of graphs using Edges and Matrices
  * 
- * @author Cameron McKay and Daler
+ * @author Cameron McKay and Daler Turyssov
  * @version 2025-06-22
  */
 public class Graph<Type> {
-	HashMap<Type, Vertex> graphMap;
+	private HashMap<Type, Vertex> graphMap;
 
 	/**
 	 * Main constructor for Graph object
@@ -57,6 +57,32 @@ public class Graph<Type> {
 	 * @return boolean true if path exists false if not
 	 */
 	public boolean depthFirstSearch(Type source, Type destination) {
+		HashMap<Type, Boolean> visited = new HashMap<>();
+		return depthFirstSearchHelper(source, destination, visited);
+	}
+
+	/**
+	 * Private recursive helper method for depth first search
+	 * 
+	 * @param source  the current vertex being searched
+	 * @param target  the destination vertex being searched for
+	 * @param visited that stores vertices that have already been visited
+	 * @return true if there is a path from current vertex to the target or false if
+	 *         not
+	 */
+	private boolean depthFirstSearchHelper(Type source, Type target, HashMap<Type, Boolean> visited) {
+		if (source == target) {
+			return true;
+		}
+		visited.put(source, true);
+		Vertex sourceVertex = graphMap.get(source);
+		List<Edge> outgoingEdges = sourceVertex.getEdges();
+		for (Edge edgeDestination : outgoingEdges) {
+			Vertex destinationVertex = edgeDestination.getDestination();
+			if (!visited.containsKey(target)) {
+				return depthFirstSearchHelper(destinationVertex.getData(), target, visited);
+			}
+		}
 		return false;
 	}
 
@@ -110,6 +136,7 @@ public class Graph<Type> {
 		public Vertex(Type data) {
 			this.data = data;
 			this.outgoingEdges = new LinkedList<Edge>();
+
 		}
 
 		public void addEdge(Vertex destination) {
@@ -120,5 +147,10 @@ public class Graph<Type> {
 		public Type getData() {
 			return this.data;
 		}
+
+		public List<Edge> getEdges() {
+			return this.outgoingEdges;
+		}
+
 	}
 }

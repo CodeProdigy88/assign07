@@ -135,7 +135,7 @@ public class Graph<Type> {
 				if (!cameFrom.containsKey(destinationVertex.getData())) {
 					cameFrom.put(destinationVertex.getData(), current.getData());
 					searchQueue.add(destinationVertex);
-				}
+				
 			}
 
 		}
@@ -145,9 +145,12 @@ public class Graph<Type> {
 			path = cameFrom.get(path);
 		}
 		returnList.addFirst(source);
-
+	
 		return returnList;
 	}
+	}
+}
+
 
 	/**
 	 * Sorts a map of objects topologically Only works on acyclic graphs
@@ -155,9 +158,36 @@ public class Graph<Type> {
 	 * @return List<Type> sorted list topologically
 	 */
 	public List<Type> topoSort() {
+		Queue<Vertex> searchQueue = new LinkedList<Vertex>();
 		List<Type> returnList = new LinkedList<Type>();
+		HashMap<Type, Integer> inDegree = new HashMap<>();
+		for (Vertex vertex : graphMap.values()) {
+			for (Edge edge : vertex.getEdges()) {
+				Type destination = edge.getDestination().getData();
+				int newInDegree = inDegree.get(destination) + 1;
+				inDegree.put(destination, newInDegree);
+			}
+			for (Type key : inDegree.keySet()) {
+				if (inDegree.get(key) == 0) {
+					searchQueue.add(graphMap.get(key));
+				}
+			}
+			while (!searchQueue.isEmpty()) {
+				Vertex data = searchQueue.poll();
+				returnList.add(data.getData());
+				for (Edge edge : data.getEdges()) {
+					Type destination = edge.getDestination().getData();
+					int newInDegree = inDegree.get(destination) - 1;
+					inDegree.put(destination, newInDegree);
+					if (newInDegree == 0) {
+						searchQueue.add(graphMap.get(destination));
+					}
+				}
+			}
+		}
 		return returnList;
 	}
+
 
 	/**
 	 * A class that represents directed edges in between vertices Holds the
